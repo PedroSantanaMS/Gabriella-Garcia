@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Para o Meu Amor</title>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; background-color: #5c94fc; font-family: 'Arial', sans-serif; touch-action: manipulation; }
+        
+        /* Telas de Início, Fim e Celebração */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 100; text-align: center; padding: 20px; box-sizing: border-box;
+        }
+
+        #tela-inicio { background-color: #5c94fc; color: white; display: flex; }
+        #tela-final { background-color: rgba(0,0,0,0.9); color: white; display: none; }
+        #tela-celebracao { background: #ffb6c1 url('fogos.png') center/cover; background-blend-mode: screen; display: none; }
+
+        #game-container {
+            width: 100vw; height: 100vh; position: relative;
+            background-image: url('fundo.png'); 
+            background-size: auto 100%; background-repeat: repeat-x; background-position: 0 bottom;
+            display: none; /* Só aparece quando o jogo começa */
+        }
+
+        #player { width: 100px; height: 100px; background: url('player.png') no-repeat center/contain; position: absolute; bottom: 80px; left: 40px; z-index: 5; }
+        #princesa { width: 110px; height: 110px; background: url('princesa.png') no-repeat center/contain; position: absolute; bottom: 80px; right: -150px; }
+        #chao { width: 100%; height: 80px; background-color: #2e8b57; position: absolute; bottom: 0; border-top: 4px solid #1e5d3a; }
+        .obstaculo { width: 60px; height: 60px; background-color: #885418; border: 3px solid #000; position: absolute; bottom: 80px; }
+
+        .foto-sucesso { width: 85%; max-width: 350px; border: 10px solid white; border-radius: 20px; margin-top: 20px; }
+        .texto-carinhoso { font-style: italic; font-size: 18px; margin: 15px 0; color: #ffeb3b; line-height: 1.4; }
+        
+        .area-botoes { position: relative; width: 100%; height: 150px; margin-top: 20px; }
+        button { padding: 20px 40px; font-size: 22px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; }
+        button:active { transform: translateY(4px); box-shadow: none; }
+        
+        #btn-jogar { background-color: #4CAF50; color: white; font-size: 28px; }
+        #btn-sim { background-color: #ff4757; color: white; position: relative; z-index: 101; }
+        #btn-nao { background-color: #7f8c8d; color: white; position: absolute; transition: 0.1s; }
+    </style>
+</head>
+<body onclick="pular()">
+
+<div id="tela-inicio" class="overlay">
+    <h1 style="font-size: 40px; margin-bottom: 30px;">Pronta para o desafio? ❤️</h1>
+    <button id="btn-jogar" onclick="iniciarJogo(event)">JOGAR!</button>
+</div>
+
+<div id="game-container">
+    <div id="chao"></div>
+    <div id="player"></div>
+    <div id="princesa"></div>
+    <div class="obstaculo" style="left: 800px;"></div>
+    <div class="obstaculo" style="left: 1400px;"></div>
+    <div class="obstaculo" style="left: 2000px;"></div>
+</div>
+
+<div id="tela-final" class="overlay">
+    <h2 style="font-size: 28px;">Nenem, você chegou ao fim! ❤️</h2>
+    <p class="texto-carinhoso">
+        Cada obstáculo que passei aqui foi só uma brincadeira perto da sorte que é ter você. <br>
+        Você é a pessoa que eu quero ao meu lado em todas as fases da vida.
+    </p>
+    <h1 style="font-size: 32px;">Quer namorar comigo?</h1>
+    
+    <div class="area-botoes">
+        <button id="btn-sim" onclick="aceitou(event)">SIM!</button>
+        <button id="btn-nao" onmouseover="fugir()" ontouchstart="fugir(event)">Não</button>
+    </div>
+</div>
+
+<div id="tela-celebracao" class="overlay">
+    <h1 style="color: white; font-size: 40px; text-shadow: 2px 2px #ff4757;">DISSE SIM! ❤️</h1>
+    <img src="foto_final.png" class="foto-sucesso">
+    <h2 style="color: white; margin-top: 20px;">Te amo Gatinha!</h2>
+</div>
+
+<script>
+    const player = document.getElementById('player');
+    const gameContainer = document.getElementById('game-container');
+    const princesa = document.getElementById('princesa');
+    const telaInicio = document.getElementById('tela-inicio');
+    const telaFinal = document.getElementById('tela-final');
+    const telaCelebracao = document.getElementById('tela-celebracao');
+    const btnNao = document.getElementById('btn-nao');
+
+    let playerY = 80;
+    let isJumping = false;
+    let velocityY = 0;
+    let gamePos = 0;
+    let gameActive = false;
+    const finalDaFase = 2700;
+
+    // Inicializa posição do botão não
+    btnNao.style.left = 'calc(50% + 20px)';
+    btnNao.style.top = '0px';
+
+    function iniciarJogo(event) {
+        event.stopPropagation();
+        telaInicio.style.display = 'none';
+        gameContainer.style.display = 'block';
+        gameActive = true;
+        loop(); // Inicia o loop do jogo
+    }
+
+    function pular() {
+        if (!isJumping && gameActive) {
+            isJumping = true;
+            velocityY = -15;
+        }
+    }
+
+    function loop() {
+        if (gameActive) {
+            // Física do Pulo
+            velocityY += 0.8;
+            playerY -= velocityY;
+            if (playerY <= 80) { playerY = 80; isJumping = false; velocityY = 0; }
+            player.style.bottom = playerY + 'px';
+
+            // Movimento do Fundo
+            gamePos += 3;
+            gameContainer.style.backgroundPosition = `-${gamePos}px bottom`;
+            
+            // Movimento dos Obstáculos
+            document.querySelectorAll('.obstaculo').forEach(obs => {
+                let left = parseInt(obs.style.left) - 3;
+                obs.style.left = left + 'px';
+            });
+
+            // Aproximação da Princesa
+            if (gamePos > finalDaFase - 500) {
+                princesa.style.right = (parseInt(princesa.style.right || -150) + 3) + 'px';
+                if (gamePos > finalDaFase - 100) {
+                    gameActive = false;
+                    telaFinal.style.display = 'flex';
+                }
+            }
+            requestAnimationFrame(loop);
+        }
+    }
+
+    function fugir(event) {
+        if(event) event.stopPropagation();
+        const larguraArea = window.innerWidth - 120;
+        const alturaArea = window.innerHeight - 120;
+        btnNao.style.position = 'fixed';
+        btnNao.style.left = Math.random() * larguraArea + 'px';
+        btnNao.style.top = Math.random() * alturaArea + 'px';
+    }
+
+    function aceitou(event) {
+        event.stopPropagation();
+        telaFinal.style.display = 'none';
+        telaCelebracao.style.display = 'flex';
+    }
+</script>
+</body>
+</html>
