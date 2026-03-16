@@ -14,8 +14,7 @@
         }
 
         #tela-inicio { background-color: #5c94fc; color: white; display: flex; }
-        #tela-desafio { background-color: rgba(0,0,0,0.95); color: white; display: none; }
-        #tela-pedido { background-color: rgba(0,0,0,0.95); color: white; display: none; }
+        #tela-desafio, #tela-pedido { background-color: rgba(0,0,0,0.95); color: white; display: none; }
         #tela-celebracao { background: #ffb6c1 url('fogos.png') center/cover; background-blend-mode: screen; display: none; }
 
         #game-container {
@@ -31,17 +30,16 @@
         .obstaculo { width: 50px; height: 50px; background-color: #885418; border: 3px solid #000; position: absolute; bottom: 15vh; z-index: 3; }
 
         .foto-sucesso { width: 85%; max-width: 350px; border: 10px solid white; border-radius: 20px; margin-top: 20px; }
-        .texto-carinhoso { font-style: italic; font-size: 18px; margin: 15px 0; color: #ffeb3b; line-height: 1.4; }
-        .texto-gatinha { font-size: 36px; color: #ff0000; font-weight: bold; margin-top: 20px; text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 2px 2px 0 #000000; }
+        .texto-carinhoso { font-style: italic; font-size: 18px; margin-bottom: 20px; color: #ffeb3b; line-height: 1.4; }
+        .texto-gatinha { font-size: 32px; color: #ff0000; font-weight: bold; margin-top: 20px; text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 2px 2px 0 #000000; text-align: center; }
 
-        .area-botoes { display: flex; gap: 20px; justify-content: center; align-items: center; margin-top: 20px; width: 100%; height: 100px; position: relative; }
+        .area-botoes { display: flex; gap: 20px; justify-content: center; align-items: center; margin-top: 20px; width: 100%; height: 80px; position: relative; }
         button { padding: 15px 30px; font-size: 22px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; }
         
         #btn-jogar { background-color: #4CAF50; color: white; font-size: 28px; }
         .btn-sim { background-color: #ff4757; color: white; }
         .btn-nao { background-color: #7f8c8d; color: white; transition: 0.1s; }
         
-        /* Classe para o botão que foge no final */
         #btn-nao-foge { position: absolute; }
     </style>
 </head>
@@ -63,10 +61,10 @@
 
 <div id="tela-desafio" class="overlay">
     <h2 style="font-size: 28px;">Neném, você chegou ao fim! ❤️</h2>
-    <h1 style="font-size: 32px; margin-top: 20px;">Pronta para o próximo desafio?</h1>
+    <h1 style="font-size: 32px; margin-top: 10px;">Pronta para o próximo desafio?</h1>
     <div class="area-botoes">
         <button class="btn-sim" onclick="abrirPedido(event)">SIM!</button>
-        <button class="btn-nao" onclick="alert('Ah, tem que clicar em sim! rs')">Não</button>
+        <button class="btn-nao" onclick="alert('Ah, tem que clicar em SIM! rs')">Não</button>
     </div>
 </div>
 
@@ -76,14 +74,14 @@
         Você é a pessoa que eu quero ao meu lado em todas as fases da vida.
     </p>
     <h1 style="font-size: 32px;">Quer namorar comigo?</h1>
-    <div class="area-botoes">
+    <div class="area-botoes" id="container-pedido">
         <button class="btn-sim" onclick="aceitou(event)">SIM!</button>
         <button id="btn-nao-foge" class="btn-nao" onmouseover="fugir(event)" ontouchstart="fugir(event)">Não</button>
     </div>
 </div>
 
 <div id="tela-celebracao" class="overlay">
-    <h1 style="color: white; font-size: 40px; text-shadow: 2px 2px #ff4757;">DISSE SIM! ❤️</h1>
+    <h1 style="color: white; font-size: 32px; text-shadow: 2px 2px #ff4757;">Fim de Jogo!<br>O final feliz foi escolhido ❤️</h1>
     <img src="foto_final.png" class="foto-sucesso">
     <p class="texto-gatinha">Te amo Gatinha!</p>
 </div>
@@ -151,9 +149,8 @@
         event.stopPropagation();
         document.getElementById('tela-desafio').style.display = 'none';
         document.getElementById('tela-pedido').style.display = 'flex';
-        // Posiciona o botão não inicialmente ao lado do sim
-        btnNaoFoge.style.left = 'calc(50% + 20px)';
-        btnNaoFoge.style.top = '25px';
+        // Garante o alinhamento inicial idêntico à tela anterior
+        btnNaoFoge.style.position = 'static';
     }
 
     function fugir(event) {
