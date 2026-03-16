@@ -2,12 +2,12 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Para o Meu Amor</title>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #5c94fc; font-family: 'Arial', sans-serif; touch-action: manipulation; }
         
-        /* Telas de Início, Fim e Celebração */
+        /* Telas de Sobreposição (Início, Fim, Celebração) */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
@@ -18,21 +18,63 @@
         #tela-final { background-color: rgba(0,0,0,0.9); color: white; display: none; }
         #tela-celebracao { background: #ffb6c1 url('fogos.png') center/cover; background-blend-mode: screen; display: none; }
 
+        /* Container do Jogo (Ocupa 100% da Altura) */
         #game-container {
             width: 100vw; height: 100vh; position: relative;
             background-image: url('fundo.png'); 
             background-size: auto 100%; background-repeat: repeat-x; background-position: 0 bottom;
-            display: none; /* Só aparece quando o jogo começa */
+            display: none; 
         }
 
-        #player { width: 100px; height: 100px; background: url('player.png') no-repeat center/contain; position: absolute; bottom: 80px; left: 40px; z-index: 5; }
-        #princesa { width: 110px; height: 110px; background: url('princesa.png') no-repeat center/contain; position: absolute; bottom: 80px; right: -150px; }
-        #chao { width: 100%; height: 80px; background-color: #2e8b57; position: absolute; bottom: 0; border-top: 4px solid #1e5d3a; }
-        .obstaculo { width: 60px; height: 60px; background-color: #885418; border: 3px solid #000; position: absolute; bottom: 80px; }
+        /* Chão Reforçado - Agora ocupa 40% da tela */
+        #chao {
+            width: 100%; height: 40vh; /* 40% da altura da tela */
+            background-color: #2e8b57;
+            position: absolute; bottom: 0;
+            border-top: 10px solid #1e5d3a;
+            z-index: 2;
+        }
 
+        /* Personagens (Repisicionados sobre o novo chão) */
+        #player { 
+            width: 100px; height: 100px; 
+            background: url('player.png') no-repeat center/contain; 
+            position: absolute; 
+            bottom: 40vh; /* Exatamente onde começa o chão */
+            left: 40px; 
+            z-index: 5; 
+        }
+        #princesa { 
+            width: 110px; height: 110px; 
+            background: url('princesa.png') no-repeat center/contain; 
+            position: absolute; 
+            bottom: 40vh; 
+            right: -150px; 
+            z-index: 5;
+        }
+
+        .obstaculo { 
+            width: 60px; height: 60px; 
+            background-color: #885418; 
+            border: 3px solid #000; 
+            position: absolute; 
+            bottom: 40vh; 
+            z-index: 3;
+        }
+
+        /* Estilos de Texto e Botões */
         .foto-sucesso { width: 85%; max-width: 350px; border: 10px solid white; border-radius: 20px; margin-top: 20px; }
+        
+        /* Correção gramatical (acento) e carinho */
         .texto-carinhoso { font-style: italic; font-size: 18px; margin: 15px 0; color: #ffeb3b; line-height: 1.4; }
         
+        /* Seu pedido especial: Vermelho com borda branca brilhante */
+        .texto-gatinha { 
+            font-size: 36px; color: #ff0000; /* Vermelho */
+            font-weight: bold; margin-top: 20px;
+            text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff, 2px 2px 0 #000000;
+        }
+
         .area-botoes { position: relative; width: 100%; height: 150px; margin-top: 20px; }
         button { padding: 20px 40px; font-size: 22px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; }
         button:active { transform: translateY(4px); box-shadow: none; }
@@ -59,7 +101,7 @@
 </div>
 
 <div id="tela-final" class="overlay">
-    <h2 style="font-size: 28px;">Nenem, você chegou ao fim! ❤️</h2>
+    <h2 style="font-size: 28px;">Neném, você chegou ao fim! ❤️</h2>
     <p class="texto-carinhoso">
         Cada obstáculo que passei aqui foi só uma brincadeira perto da sorte que é ter você. <br>
         Você é a pessoa que eu quero ao meu lado em todas as fases da vida.
@@ -75,7 +117,7 @@
 <div id="tela-celebracao" class="overlay">
     <h1 style="color: white; font-size: 40px; text-shadow: 2px 2px #ff4757;">DISSE SIM! ❤️</h1>
     <img src="foto_final.png" class="foto-sucesso">
-    <h2 style="color: white; margin-top: 20px;">Te amo Gatinha!</h2>
+    <p class="texto-gatinha">Te amo Gatinha!</p>
 </div>
 
 <script>
@@ -87,9 +129,12 @@
     const telaCelebracao = document.getElementById('tela-celebracao');
     const btnNao = document.getElementById('btn-nao');
 
-    let playerY = 80;
+    // Nova física adaptada à altura da tela (vh)
+    const floorHeightVh = 40; // 40% da tela é chão
+    let playerYVh = 100 - floorHeightVh; // Inicia sobre o chão (60vh do topo)
     let isJumping = false;
-    let velocityY = 0;
+    let velocityYVh = 0; // Velocidade baseada em vh
+    
     let gamePos = 0;
     let gameActive = false;
     const finalDaFase = 2700;
@@ -99,46 +144,59 @@
     btnNao.style.top = '0px';
 
     function iniciarJogo(event) {
-        event.stopPropagation();
+        if(event) event.stopPropagation();
         telaInicio.style.display = 'none';
         gameContainer.style.display = 'block';
         gameActive = true;
-        loop(); // Inicia o loop do jogo
+        loop(); 
     }
 
     function pular() {
+        // Ajuste da força do pulo para vh
         if (!isJumping && gameActive) {
             isJumping = true;
-            velocityY = -15;
+            velocityYVh = -3; // Força de pulo adaptada
         }
     }
 
     function loop() {
         if (gameActive) {
-            // Física do Pulo
-            velocityY += 0.8;
-            playerY -= velocityY;
-            if (playerY <= 80) { playerY = 80; isJumping = false; velocityY = 0; }
-            player.style.bottom = playerY + 'px';
+            // Física do Pulo baseada em vh
+            velocityYVh += 0.15; // Gravidade adaptada
+            playerYVh -= velocityYVh;
+            
+            // Checagem de chão baseada no topo
+            if (playerYVh >= (100 - floorHeightVh)) { 
+                playerYVh = (100 - floorHeightVh); 
+                isJumping = false; 
+                velocityYVh = 0; 
+            }
+            
+            // O player é posicionado pelo 'top' para garantir visibilidade
+            player.style.top = playerYVh + 'vh';
 
             // Movimento do Fundo
             gamePos += 3;
             gameContainer.style.backgroundPosition = `-${gamePos}px bottom`;
             
-            // Movimento dos Obstáculos
-            document.querySelectorAll('.obstaculo').forEach(obs => {
-                let left = parseInt(obs.style.left) - 3;
-                obs.style.left = left + 'px';
-            });
-
-            // Aproximação da Princesa
-            if (gamePos > finalDaFase - 500) {
-                princesa.style.right = (parseInt(princesa.style.right || -150) + 3) + 'px';
-                if (gamePos > finalDaFase - 100) {
-                    gameActive = false;
-                    telaFinal.style.display = 'flex';
+            // Movimento dos Obstáculos e Princesa
+            document.querySelectorAll('.obstaculo, #princesa').forEach(element => {
+                let left = parseInt(element.style.left || window.getComputedStyle(element).left) - 3;
+                if(element.id === "princesa") {
+                    // A princesa para no final
+                    let targetPos = window.innerWidth - 180;
+                    if(gamePos < finalDaFase - 100) {
+                        element.style.left = (window.innerWidth + (finalDaFase - gamePos) - 400) + 'px';
+                    } else {
+                        element.style.left = targetPos + 'px';
+                        gameActive = false;
+                        telaFinal.style.display = 'flex';
+                    }
+                } else {
+                    element.style.left = left + 'px';
                 }
-            }
+            });
+            
             requestAnimationFrame(loop);
         }
     }
@@ -153,7 +211,7 @@
     }
 
     function aceitou(event) {
-        event.stopPropagation();
+        if(event) event.stopPropagation();
         telaFinal.style.display = 'none';
         telaCelebracao.style.display = 'flex';
     }
