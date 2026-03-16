@@ -7,7 +7,6 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background-color: #5c94fc; font-family: 'Arial', sans-serif; touch-action: manipulation; }
         
-        /* Telas de Sobreposição (Início, Fim, Celebração) */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: flex; justify-content: center; align-items: center; flex-direction: column;
@@ -18,7 +17,6 @@
         #tela-final { background-color: rgba(0,0,0,0.9); color: white; display: none; }
         #tela-celebracao { background: #ffb6c1 url('fogos.png') center/cover; background-blend-mode: screen; display: none; }
 
-        /* Container do Jogo (Ocupa 100% da Altura) */
         #game-container {
             width: 100vw; height: 100vh; position: relative;
             background-image: url('fundo.png'); 
@@ -26,58 +24,53 @@
             display: none; 
         }
 
-        /* Chão Reforçado - Agora ocupa 40% da tela */
+        /* Chão mais fino (15% da altura) */
         #chao {
-            width: 100%; height: 40vh; /* 40% da altura da tela */
+            width: 100%; height: 15vh;
             background-color: #2e8b57;
             position: absolute; bottom: 0;
-            border-top: 10px solid #1e5d3a;
+            border-top: 6px solid #1e5d3a;
             z-index: 2;
         }
 
-        /* Personagens (Repisicionados sobre o novo chão) */
+        /* Personagens (Tamanho e posição ajustados) */
         #player { 
-            width: 100px; height: 100px; 
+            width: 80px; height: 80px; 
             background: url('player.png') no-repeat center/contain; 
             position: absolute; 
-            bottom: 40vh; /* Exatamente onde começa o chão */
+            bottom: 15vh; /* Inicia colado no chão */
             left: 40px; 
             z-index: 5; 
         }
         #princesa { 
-            width: 110px; height: 110px; 
+            width: 90px; height: 90px; 
             background: url('princesa.png') no-repeat center/contain; 
             position: absolute; 
-            bottom: 40vh; 
+            bottom: 15vh; 
             right: -150px; 
             z-index: 5;
         }
 
         .obstaculo { 
-            width: 60px; height: 60px; 
+            width: 50px; height: 50px; 
             background-color: #885418; 
             border: 3px solid #000; 
             position: absolute; 
-            bottom: 40vh; 
+            bottom: 15vh; 
             z-index: 3;
         }
 
-        /* Estilos de Texto e Botões */
         .foto-sucesso { width: 85%; max-width: 350px; border: 10px solid white; border-radius: 20px; margin-top: 20px; }
-        
-        /* Correção gramatical (acento) e carinho */
         .texto-carinhoso { font-style: italic; font-size: 18px; margin: 15px 0; color: #ffeb3b; line-height: 1.4; }
         
-        /* Seu pedido especial: Vermelho com borda branca brilhante */
         .texto-gatinha { 
-            font-size: 36px; color: #ff0000; /* Vermelho */
+            font-size: 36px; color: #ff0000;
             font-weight: bold; margin-top: 20px;
-            text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #ffffff, 2px 2px 0 #000000;
+            text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 2px 2px 0 #000000;
         }
 
         .area-botoes { position: relative; width: 100%; height: 150px; margin-top: 20px; }
         button { padding: 20px 40px; font-size: 22px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; }
-        button:active { transform: translateY(4px); box-shadow: none; }
         
         #btn-jogar { background-color: #4CAF50; color: white; font-size: 28px; }
         #btn-sim { background-color: #ff4757; color: white; position: relative; z-index: 101; }
@@ -107,7 +100,6 @@
         Você é a pessoa que eu quero ao meu lado em todas as fases da vida.
     </p>
     <h1 style="font-size: 32px;">Quer namorar comigo?</h1>
-    
     <div class="area-botoes">
         <button id="btn-sim" onclick="aceitou(event)">SIM!</button>
         <button id="btn-nao" onmouseover="fugir()" ontouchstart="fugir(event)">Não</button>
@@ -126,20 +118,15 @@
     const princesa = document.getElementById('princesa');
     const telaInicio = document.getElementById('tela-inicio');
     const telaFinal = document.getElementById('tela-final');
-    const telaCelebracao = document.getElementById('tela-celebracao');
     const btnNao = document.getElementById('btn-nao');
 
-    // Nova física adaptada à altura da tela (vh)
-    const floorHeightVh = 40; // 40% da tela é chão
-    let playerYVh = 100 - floorHeightVh; // Inicia sobre o chão (60vh do topo)
+    let playerY = 15; // Inicia em 15vh (em cima do chão)
     let isJumping = false;
-    let velocityYVh = 0; // Velocidade baseada em vh
-    
+    let velocityY = 0;
     let gamePos = 0;
     let gameActive = false;
     const finalDaFase = 2700;
 
-    // Inicializa posição do botão não
     btnNao.style.left = 'calc(50% + 20px)';
     btnNao.style.top = '0px';
 
@@ -152,68 +139,61 @@
     }
 
     function pular() {
-        // Ajuste da força do pulo para vh
         if (!isJumping && gameActive) {
             isJumping = true;
-            velocityYVh = -3; // Força de pulo adaptada
+            velocityY = 1.8; // Impulso inicial
         }
     }
 
     function loop() {
         if (gameActive) {
-            // Física do Pulo baseada em vh
-            velocityYVh += 0.15; // Gravidade adaptada
-            playerYVh -= velocityYVh;
-            
-            // Checagem de chão baseada no topo
-            if (playerYVh >= (100 - floorHeightVh)) { 
-                playerYVh = (100 - floorHeightVh); 
-                isJumping = false; 
-                velocityYVh = 0; 
+            // Física simples usando bottom %
+            if (isJumping) {
+                velocityY -= 0.08; // Gravidade
+                playerY += velocityY;
+                
+                if (playerY <= 15) {
+                    playerY = 15;
+                    isJumping = false;
+                    velocityY = 0;
+                }
             }
-            
-            // O player é posicionado pelo 'top' para garantir visibilidade
-            player.style.top = playerYVh + 'vh';
+            player.style.bottom = playerY + 'vh';
 
-            // Movimento do Fundo
+            // Movimento
             gamePos += 3;
             gameContainer.style.backgroundPosition = `-${gamePos}px bottom`;
             
-            // Movimento dos Obstáculos e Princesa
             document.querySelectorAll('.obstaculo, #princesa').forEach(element => {
                 let left = parseInt(element.style.left || window.getComputedStyle(element).left) - 3;
                 if(element.id === "princesa") {
-                    // A princesa para no final
-                    let targetPos = window.innerWidth - 180;
+                    let targetPos = window.innerWidth - 120;
                     if(gamePos < finalDaFase - 100) {
-                        element.style.left = (window.innerWidth + (finalDaFase - gamePos) - 400) + 'px';
+                        element.style.left = (window.innerWidth + (finalDaFase - gamePos) - 300) + 'px';
                     } else {
                         element.style.left = targetPos + 'px';
                         gameActive = false;
-                        telaFinal.style.display = 'flex';
+                        setTimeout(() => { telaFinal.style.display = 'flex'; }, 500);
                     }
                 } else {
                     element.style.left = left + 'px';
                 }
             });
-            
             requestAnimationFrame(loop);
         }
     }
 
     function fugir(event) {
         if(event) event.stopPropagation();
-        const larguraArea = window.innerWidth - 120;
-        const alturaArea = window.innerHeight - 120;
         btnNao.style.position = 'fixed';
-        btnNao.style.left = Math.random() * larguraArea + 'px';
-        btnNao.style.top = Math.random() * alturaArea + 'px';
+        btnNao.style.left = Math.random() * (window.innerWidth - 120) + 'px';
+        btnNao.style.top = Math.random() * (window.innerHeight - 120) + 'px';
     }
 
     function aceitou(event) {
         if(event) event.stopPropagation();
-        telaFinal.style.display = 'none';
-        telaCelebracao.style.display = 'flex';
+        document.getElementById('tela-final').style.display = 'none';
+        document.getElementById('tela-celebracao').style.display = 'flex';
     }
 </script>
 </body>
