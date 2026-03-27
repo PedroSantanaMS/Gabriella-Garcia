@@ -14,6 +14,7 @@
         }
 
         #tela-inicio { background-color: #5c94fc; color: white; display: flex; }
+        #tela-historia { background-color: rgba(0,0,0,0.95); color: white; display: none; }
         #tela-desafio, #tela-pedido { background-color: rgba(0,0,0,0.95); color: white; display: none; }
         #tela-celebracao { background: #ffb6c1 url('fogos.png') center/cover; background-blend-mode: screen; display: none; }
 
@@ -31,12 +32,14 @@
 
         .foto-sucesso { width: 85%; max-width: 350px; border: 10px solid white; border-radius: 20px; margin-top: 20px; }
         .texto-carinhoso { font-style: italic; font-size: 18px; margin-bottom: 20px; color: #ffeb3b; line-height: 1.4; }
+        .texto-historia { font-size: 20px; line-height: 1.6; padding: 0 10px; margin-bottom: 30px; text-align: justify; color: #ecf0f1; }
         .texto-gatinha { font-size: 32px; color: #ff0000; font-weight: bold; margin-top: 20px; text-shadow: 0 0 10px #ffffff, 0 0 20px #ffffff, 2px 2px 0 #000000; text-align: center; }
 
         .area-botoes { display: flex; gap: 20px; justify-content: center; align-items: center; margin-top: 20px; width: 100%; height: 80px; position: relative; }
         button { padding: 15px 30px; font-size: 22px; border-radius: 15px; border: none; font-weight: bold; cursor: pointer; box-shadow: 0 4px 0 #000; }
         
         #btn-jogar { background-color: #4CAF50; color: white; font-size: 28px; }
+        #btn-continuar { background-color: #3498db; color: white; font-size: 24px; }
         .btn-sim { background-color: #ff4757; color: white; }
         .btn-nao { background-color: #7f8c8d; color: white; transition: 0.1s; }
         
@@ -47,7 +50,14 @@
 
 <div id="tela-inicio" class="overlay">
     <h1 style="font-size: 40px; margin-bottom: 30px;">Pronta para o desafio? ❤️</h1>
-    <button id="btn-jogar" onclick="iniciarJogo(event)">JOGAR!</button>
+    <button id="btn-jogar" onclick="iniciarHistoria(event)">JOGAR!</button>
+</div>
+
+<div id="tela-historia" class="overlay">
+    <p class="texto-historia">
+        10 anos atrás você conhece uma menina linda e bota na sua cabeça que iria namorar com ela. Porém por alguns acasos da vida vocês se afastam e ficam sem contato nenhum. Até que um certo dia se reencontram e você percebe que ainda existe aquela vontade de 10 anos atrás. Mas para isso existem alguns obstáculos que você precisa superar. Está pronto?
+    </p>
+    <button id="btn-continuar" onclick="iniciarFase(event)">CONTINUAR!</button>
 </div>
 
 <div id="game-container">
@@ -99,9 +109,17 @@
     let gameActive = false;
     const finalDaFase = 2700;
 
-    function iniciarJogo(event) {
+    // Quando clica em JOGAR, abre a História
+    function iniciarHistoria(event) {
         event.stopPropagation();
         document.getElementById('tela-inicio').style.display = 'none';
+        document.getElementById('tela-historia').style.display = 'flex';
+    }
+
+    // Quando clica em CONTINUAR, o jogo começa
+    function iniciarFase(event) {
+        event.stopPropagation();
+        document.getElementById('tela-historia').style.display = 'none';
         gameContainer.style.display = 'block';
         gameActive = true;
         loop(); 
@@ -149,7 +167,6 @@
         event.stopPropagation();
         document.getElementById('tela-desafio').style.display = 'none';
         document.getElementById('tela-pedido').style.display = 'flex';
-        // Garante o alinhamento inicial idêntico à tela anterior
         btnNaoFoge.style.position = 'static';
     }
 
