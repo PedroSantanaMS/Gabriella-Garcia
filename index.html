@@ -64,9 +64,9 @@
     <div id="chao"></div>
     <div id="player"></div>
     <div id="princesa"></div>
-    <div class="obstaculo" style="left: 800px;"></div>
-    <div class="obstaculo" style="left: 1400px;"></div>
-    <div class="obstaculo" style="left: 2000px;"></div>
+    <div class="obstaculo" style="left: 600px;"></div>
+    <div class="obstaculo" style="left: 1200px;"></div>
+    <div class="obstaculo" style="left: 1800px;"></div>
 </div>
 
 <div id="tela-desafio" class="overlay">
@@ -107,16 +107,17 @@
     let velocityY = 0;
     let gamePos = 0;
     let gameActive = false;
-    const finalDaFase = 2700;
+    
+    // Velocidade do jogo reduzida (era 3, agora é 2)
+    const gameSpeed = 2; 
+    const finalDaFase = 2000; // Reduzido um pouco o tamanho da fase já que está mais devagar
 
-    // Quando clica em JOGAR, abre a História
     function iniciarHistoria(event) {
         event.stopPropagation();
         document.getElementById('tela-inicio').style.display = 'none';
         document.getElementById('tela-historia').style.display = 'flex';
     }
 
-    // Quando clica em CONTINUAR, o jogo começa
     function iniciarFase(event) {
         event.stopPropagation();
         document.getElementById('tela-historia').style.display = 'none';
@@ -128,24 +129,26 @@
     function pular() {
         if (!isJumping && gameActive) {
             isJumping = true;
-            velocityY = 1.8;
+            // Pulo um pouco mais suave para acompanhar a velocidade menor
+            velocityY = 1.5; 
         }
     }
 
     function loop() {
         if (gameActive) {
             if (isJumping) {
-                velocityY -= 0.08;
+                // Gravidade um pouco mais leve para o pulo durar o tempo certo
+                velocityY -= 0.06; 
                 playerY += velocityY;
                 if (playerY <= 15) { playerY = 15; isJumping = false; velocityY = 0; }
             }
             player.style.bottom = playerY + 'vh';
 
-            gamePos += 3;
+            gamePos += gameSpeed;
             gameContainer.style.backgroundPosition = `-${gamePos}px bottom`;
             
             document.querySelectorAll('.obstaculo, #princesa').forEach(element => {
-                let left = parseInt(element.style.left || window.getComputedStyle(element).left) - 3;
+                let left = parseInt(element.style.left || window.getComputedStyle(element).left) - gameSpeed;
                 if(element.id === "princesa") {
                     let targetPos = window.innerWidth - 120;
                     if(gamePos < finalDaFase - 100) {
